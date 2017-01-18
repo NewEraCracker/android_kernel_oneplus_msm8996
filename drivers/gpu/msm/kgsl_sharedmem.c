@@ -621,12 +621,11 @@ int kgsl_cache_range_op(struct kgsl_memdesc *memdesc, uint64_t offset,
 	void *addr = (memdesc->hostptr) ?
 		memdesc->hostptr : (void *) memdesc->useraddr;
 
-	/* Make sure that size is non-zero */
-	if (!size)
+	if (size == 0 || size > UINT_MAX)
 		return -EINVAL;
 
-	/* Make sure that the offset + size isn't bigger than we can handle */
-	if ((offset + size) > ULONG_MAX)
+	/* Make sure that the offset + size does not overflow */
+	if ((offset + size < offset) || (offset + size < size))
 		return -ERANGE;
 
 	/* Make sure the offset + size do not overflow the address */
@@ -914,8 +913,8 @@ kgsl_sharedmem_readl(const struct kgsl_memdesc *memdesc,
 	if (offsetbytes % sizeof(uint32_t) != 0)
 		return -EINVAL;
 
-	WARN_ON(offsetbytes + sizeof(uint32_t) > memdesc->size);
-	if (offsetbytes + sizeof(uint32_t) > memdesc->size)
+	WARN_ON(offsetbytes > (memdesc->size - sizeof(uint32_t)));
+	if (offsetbytes > (memdesc->size - sizeof(uint32_t)))
 		return -ERANGE;
 
 	rmb();
@@ -937,8 +936,8 @@ kgsl_sharedmem_writel(struct kgsl_device *device,
 	if (offsetbytes % sizeof(uint32_t) != 0)
 		return -EINVAL;
 
-	WARN_ON(offsetbytes + sizeof(uint32_t) > memdesc->size);
-	if (offsetbytes + sizeof(uint32_t) > memdesc->size)
+	WARN_ON(offsetbytes > (memdesc->size - sizeof(uint32_t)));
+	if (offsetbytes > (memdesc->size - sizeof(uint32_t)))
 		return -ERANGE;
 	kgsl_cffdump_write(device,
 		memdesc->gpuaddr + offsetbytes,
@@ -963,8 +962,8 @@ kgsl_sharedmem_readq(const struct kgsl_memdesc *memdesc,
 	if (offsetbytes % sizeof(uint32_t) != 0)
 		return -EINVAL;
 
-	WARN_ON(offsetbytes + sizeof(uint32_t) > memdesc->size);
-	if (offsetbytes + sizeof(uint32_t) > memdesc->size)
+	WARN_ON(offsetbytes > (memdesc->size - sizeof(uint32_t)));
+	if (offsetbytes > (memdesc->size - sizeof(uint32_t)))
 		return -ERANGE;
 
 	/*
@@ -990,8 +989,8 @@ kgsl_sharedmem_writeq(struct kgsl_device *device,
 	if (offsetbytes % sizeof(uint32_t) != 0)
 		return -EINVAL;
 
-	WARN_ON(offsetbytes + sizeof(uint32_t) > memdesc->size);
-	if (offsetbytes + sizeof(uint32_t) > memdesc->size)
+	WARN_ON(offsetbytes > (memdesc->size - sizeof(uint32_t)));
+	if (offsetbytes > (memdesc->size - sizeof(uint32_t)))
 		return -ERANGE;
 	kgsl_cffdump_write(device,
 		lower_32_bits(memdesc->gpuaddr + offsetbytes), src);

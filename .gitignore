@@ -101,3 +101,6 @@ x509.genkey
 
 # Kconfig presets
 all.config
+
+# build output directory
+/build/

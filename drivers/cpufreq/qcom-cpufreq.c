@@ -132,13 +132,13 @@ static int msm_cpufreq_target(struct cpufreq_policy *policy,
 		goto done;
 	}
 
-	if (policy->cpu >= BIG_CPU_NUM) {
+	/*if (policy->cpu >= BIG_CPU_NUM) {
 		target_freq = max((unsigned int)pm_qos_request(PM_QOS_BIG_CPU_FREQ_MIN), target_freq);
                 target_freq = min((unsigned int)pm_qos_request(PM_QOS_BIG_CPU_FREQ_MAX), target_freq);
 	 } else {
                 target_freq = max((unsigned int)pm_qos_request(PM_QOS_LITTLE_CPU_FREQ_MIN), target_freq);
                 target_freq = min((unsigned int)pm_qos_request(PM_QOS_LITTLE_CPU_FREQ_MAX), target_freq);
-        }
+        }*/
 
 	if (cpufreq_frequency_table_target(policy, table, target_freq, relation,
 			&index)) {
@@ -151,11 +151,11 @@ static int msm_cpufreq_target(struct cpufreq_policy *policy,
 		policy->cpu, target_freq, relation,
 		policy->min, policy->max, table[index].frequency);
 
-	ret = set_cpu_freq(policy, target_freq,
+	ret = set_cpu_freq(policy, table[index].frequency,
 			   table[index].driver_data);
 
 	/* save current frequency */
-	policy->cur = target_freq;
+	//policy->cur = target_freq;
 done:
 	mutex_unlock(&per_cpu(suspend_data, policy->cpu).suspend_mutex);
 	return ret;
@@ -348,7 +348,7 @@ static struct notifier_block msm_cpufreq_pm_notifier = {
 	.notifier_call = msm_cpufreq_pm_event,
 };
 
-
+#if 0
 static void msm_qos_nop(void *info)
 {
 }
@@ -560,6 +560,7 @@ static struct notifier_block msm_big_cpu_max_qos_notifier = {
         .notifier_call = msm_big_cpu_max_qos_handler,
         .priority = INT_MAX,
 };
+#endif
 
 static struct freq_attr *msm_freq_attr[] = {
 	&cpufreq_freq_attr_scaling_available_freqs,
@@ -720,10 +721,10 @@ static int __init msm_cpufreq_probe(struct platform_device *pdev)
 		per_cpu(freq_table, cpu) = ftbl;
 	}
 
-	pm_qos_add_notifier(PM_QOS_LITTLE_CPU_FREQ_MIN, &msm_little_cpu_min_qos_notifier);
-	pm_qos_add_notifier(PM_QOS_LITTLE_CPU_FREQ_MAX, &msm_little_cpu_max_qos_notifier);
-	pm_qos_add_notifier(PM_QOS_BIG_CPU_FREQ_MIN, &msm_big_cpu_min_qos_notifier);
-	pm_qos_add_notifier(PM_QOS_BIG_CPU_FREQ_MAX, &msm_big_cpu_max_qos_notifier);
+	//pm_qos_add_notifier(PM_QOS_LITTLE_CPU_FREQ_MIN, &msm_little_cpu_min_qos_notifier);
+	//pm_qos_add_notifier(PM_QOS_LITTLE_CPU_FREQ_MAX, &msm_little_cpu_max_qos_notifier);
+	//pm_qos_add_notifier(PM_QOS_BIG_CPU_FREQ_MIN, &msm_big_cpu_min_qos_notifier);
+	//pm_qos_add_notifier(PM_QOS_BIG_CPU_FREQ_MAX, &msm_big_cpu_max_qos_notifier);
 
 	return 0;
 }

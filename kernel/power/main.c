@@ -443,7 +443,7 @@ static ssize_t state_store(struct kobject *kobj, struct kobj_attribute *attr,
 
  out:
 	pm_autosleep_unlock();
-	resumeboost_fn();
+	//resumeboost_fn();
 	return error ? error : n;
 }
 

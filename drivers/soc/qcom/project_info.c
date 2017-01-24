@@ -81,34 +81,37 @@ static ssize_t project_info_get(struct device *dev,
 			    struct device_attribute *attr,
 			    char *buf)
 {
-	if (attr == &dev_attr_project_name)
-		return sprintf(buf, "%s\n", project_info_desc->project_name);
-	if (attr == &dev_attr_hw_id)
-		return sprintf(buf, "%d\n", project_info_desc->hw_version);
-	if (attr == &dev_attr_rf_id_v1)
-		return sprintf(buf, "%d\n", project_info_desc->rf_v1);
-	if (attr == &dev_attr_rf_id_v2)
-		return sprintf(buf, "%d\n", project_info_desc->rf_v2);
-	if (attr == &dev_attr_rf_id_v3)
-		return sprintf(buf, "%d\n", project_info_desc->rf_v3);
-	if (attr == &dev_attr_modem)
-		return sprintf(buf, "%d\n", project_info_desc->modem);
-	if (attr == &dev_attr_operator_no)
-		return sprintf(buf, "%d\n", project_info_desc->operator);
-	if (attr == &dev_attr_ddr_manufacture_info)
-		return sprintf(buf, "%d\n", project_info_desc->ddr_manufacture_info);
-	if (attr == &dev_attr_ddr_raw)
-		return sprintf(buf, "%d\n", project_info_desc->ddr_raw);
-	if (attr == &dev_attr_ddr_column)
-		return sprintf(buf, "%d\n", project_info_desc->ddr_column);
-	if (attr == &dev_attr_ddr_reserve_info)
-		return sprintf(buf, "%d\n", project_info_desc->ddr_reserve_info);
-	if (attr == &dev_attr_secboot_status) {
-		//return sprintf(buf, "%d\n", project_info_desc->ddr_reserve_info);
-		return sprintf(buf, "%d\n",get_secureboot_fuse_status());
+	if(project_info_desc)
+	{
+		if (attr == &dev_attr_project_name)
+			return sprintf(buf, "%s\n", project_info_desc->project_name);
+		if (attr == &dev_attr_hw_id)
+			return sprintf(buf, "%d\n", project_info_desc->hw_version);
+		if (attr == &dev_attr_rf_id_v1)
+			return sprintf(buf, "%d\n", project_info_desc->rf_v1);
+		if (attr == &dev_attr_rf_id_v2)
+			return sprintf(buf, "%d\n", project_info_desc->rf_v2);
+		if (attr == &dev_attr_rf_id_v3)
+			return sprintf(buf, "%d\n", project_info_desc->rf_v3);
+		if (attr == &dev_attr_modem)
+			return sprintf(buf, "%d\n", project_info_desc->modem);
+		if (attr == &dev_attr_operator_no)
+			return sprintf(buf, "%d\n", project_info_desc->operator);
+		if (attr == &dev_attr_ddr_manufacture_info)
+			return sprintf(buf, "%d\n", project_info_desc->ddr_manufacture_info);
+		if (attr == &dev_attr_ddr_raw)
+			return sprintf(buf, "%d\n", project_info_desc->ddr_raw);
+		if (attr == &dev_attr_ddr_column)
+			return sprintf(buf, "%d\n", project_info_desc->ddr_column);
+		if (attr == &dev_attr_ddr_reserve_info)
+			return sprintf(buf, "%d\n", project_info_desc->ddr_reserve_info);
+		if (attr == &dev_attr_secboot_status) {
+			//return sprintf(buf, "%d\n", project_info_desc->ddr_reserve_info);
+			return sprintf(buf, "%d\n",get_secureboot_fuse_status());
+		}
+		if (attr == &dev_attr_platform_id)
+			return sprintf(buf, "%d\n", socinfo_get_id());
 	}
-	if (attr == &dev_attr_platform_id)
-		return sprintf(buf, "%d\n", socinfo_get_id());
 
 	return -EINVAL;
 
@@ -326,13 +329,17 @@ struct ddr_manufacture ddr_manufacture_list[]={
 
 void get_ddr_manufacture_name(void){
 	int i;
-	int id = project_info_desc->ddr_manufacture_info;
-	for(i = 0; i < (sizeof(ddr_manufacture_list)/sizeof(ddr_manufacture_list[0])); i++)
+
+	if(project_info_desc)
 	{
-		if(ddr_manufacture_list[i].id == id)
+		int id = project_info_desc->ddr_manufacture_info;
+		for(i = 0; i < (sizeof(ddr_manufacture_list)/sizeof(ddr_manufacture_list[0])); i++)
 		{
-			sprintf(ddr_manufacture, "%s", ddr_manufacture_list[i].name);
-			break;
+			if(ddr_manufacture_list[i].id == id)
+			{
+				sprintf(ddr_manufacture, "%s", ddr_manufacture_list[i].name);
+				break;
+			}
 		}
 	}
 }

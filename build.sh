@@ -54,7 +54,7 @@ while [ $# != 0 ]; do
 	shift
 done
 
-[ "$TARGET" ] || TARGET=oneplus
+[ "$TARGET" ] || TARGET=elementalx
 
 DEFCONFIG=${TARGET}_defconfig
 
@@ -62,6 +62,8 @@ DEFCONFIG=${TARGET}_defconfig
 ABORT "Config $DEFCONFIG not found in $ARCH configs!"
 
 export LOCALVERSION=$TARGET-$VER
+
+[ "${TARGET}" = "elementalx" ] && unset LOCALVERSION
 
 CLEAN_BUILD() {
 	echo "Cleaning build..."

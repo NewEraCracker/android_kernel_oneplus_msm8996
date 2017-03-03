@@ -46,6 +46,10 @@
 #include <linux/timer.h>
 #include <linux/time.h>
 
+#ifdef CONFIG_BOEFFLA_TOUCH_KEY_CONTROL
+#include <linux/boeffla_touchkey_control.h>
+#endif
+
 #ifdef CONFIG_FB
 #include <linux/fb.h>
 #include <linux/notifier.h>
@@ -1413,6 +1417,9 @@ void int_touch(void)
 		finger_info <<= 1;
 		finger_status =  points.status & 0x03;
 		if (finger_status) {
+#ifdef CONFIG_BOEFFLA_TOUCH_KEY_CONTROL
+			btkc_touch_start();
+#endif
 			input_mt_slot(ts->input_dev, i);
 			input_mt_report_slot_state(ts->input_dev, MT_TOOL_FINGER, finger_status);
 			input_report_key(ts->input_dev, BTN_TOOL_FINGER, 1);
@@ -1456,6 +1463,9 @@ void int_touch(void)
 
 	if (finger_num == 0/* && last_status && (check_key <= 1)*/)
 	{
+#ifdef CONFIG_BOEFFLA_TOUCH_KEY_CONTROL
+		btkc_touch_stop();
+#endif
 		input_report_key(ts->input_dev, BTN_TOOL_FINGER, 0);
 #ifndef TYPE_B_PROTOCOL
 		input_mt_sync(ts->input_dev);
@@ -1463,11 +1473,13 @@ void int_touch(void)
 	}
 	input_sync(ts->input_dev);
 
+#if 0
 	if ((finger_num == 0) && (get_tp_base == 0)){//all finger up do get base once
 		get_tp_base = 1;
 		TPD_ERR("start get base data:%d\n",get_tp_base);
 		tp_baseline_get(ts, false);
 	}
+#endif
 
 #ifdef SUPPORT_GESTURE
 	if (ts->in_gesture_mode == 1 && ts->is_suspended == 1) {
@@ -1551,8 +1563,6 @@ static irqreturn_t synaptics_irq_thread_fn(int irq, void *dev_id)
 	uint8_t status = 0;
 	uint8_t inte = 0;
 
-	ts->timestamp = ktime_get();
-
 	if (atomic_read(&ts->is_stop) == 1)
 	{
 		return IRQ_HANDLED;
@@ -1561,6 +1571,8 @@ static irqreturn_t synaptics_irq_thread_fn(int irq, void *dev_id)
 	if( ts->enable_remote) {
 		return IRQ_HANDLED;
 	}
+
+	ts->timestamp = ktime_get();
 
 	ret = synaptics_rmi4_i2c_write_byte(ts->client, 0xff, 0x00 );
 	ret = synaptics_rmi4_i2c_read_word(ts->client, F01_RMI_DATA_BASE);

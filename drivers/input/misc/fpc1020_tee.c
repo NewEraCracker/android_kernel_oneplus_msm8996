@@ -52,6 +52,10 @@
 #include <linux/notifier.h>
 #endif
 
+#ifdef CONFIG_BOEFFLA_TOUCH_KEY_CONTROL
+#include <linux/boeffla_touchkey_control.h>
+#endif
+
 static unsigned int ignor_home_for_ESD = 0;
 module_param(ignor_home_for_ESD, uint, S_IRUGO | S_IWUSR);
 
@@ -331,6 +335,9 @@ static ssize_t report_home_set(struct device *dev,
 		return -EINVAL;
 	if (!strncmp(buf, "down", strlen("down")))
 	{
+#ifdef CONFIG_BOEFFLA_TOUCH_KEY_CONTROL
+		btkc_touch_button();
+#endif
         if(virtual_key_enable){
                 key_home_pressed = true;
         }else if (!s1302_is_keypad_stopped()) {
@@ -475,12 +482,16 @@ static void fpc1020_suspend_resume(struct work_struct *work)
 	struct fpc1020_data *fpc1020 =
 		container_of(work, typeof(*fpc1020), pm_work);
 
-	/* Escalate fingerprintd priority when screen is off */
 	if (fpc1020->screen_state) {
 		set_fpc_irq(fpc1020, true);
 		set_fingerprintd_nice(0);
 	} else {
-		set_fingerprintd_nice(MIN_NICE);
+		/*
+		 * Elevate fingerprintd priority when screen is off to ensure
+		 * the fingerprint sensor is responsive and that the haptic
+		 * response on successful verification always fires.
+		 */
+		set_fingerprintd_nice(-1);
 	}
 
 	sysfs_notify(&fpc1020->dev->kobj, NULL,

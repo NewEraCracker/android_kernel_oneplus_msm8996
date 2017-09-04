@@ -245,6 +245,7 @@ struct dwc3_msm {
 };
 
 int otg_switch = 1;
+
 struct dwc3_msm *opmdwc;
 
 static  int oem_test_id(int nr, const volatile unsigned long *addr, enum usb_otg_state otg_state)

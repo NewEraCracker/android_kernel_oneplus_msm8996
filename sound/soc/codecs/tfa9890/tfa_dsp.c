@@ -1254,6 +1254,7 @@ int tfa98xx_set_volume(struct tfa98xx *tfa98xx, u32 voldB)
 
 	tfa98xx_get_volume(tfa98xx, &cur_volume);
 #endif
+
 	value = snd_soc_read(codec, TFA98XX_AUDIO_CTR);
 
 	/*
@@ -1273,7 +1274,6 @@ int tfa98xx_set_volume(struct tfa98xx *tfa98xx, u32 voldB)
 	if (cur_volume < 0)
 		return 0;
 #endif
-
 	/* volume value is in the top 8 bits of the register */
 	value = (value & 0x00FF) | (u16)(volume_value << 8);
 	snd_soc_write(codec, TFA98XX_AUDIO_CTR, value);

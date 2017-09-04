@@ -1366,6 +1366,7 @@ int mdss_dsi_on(struct mdss_panel_data *pdata)
 
 	pinfo = &pdata->panel_info;
 	mipi = &pdata->panel_info.mipi;
+
 	if (!ctrl_pdata->SRGB_first_on){
 		ctrl_pdata->SRGB_first_on = 1;
 		get_param_lcm_srgb_mode(&(ctrl_pdata->SRGB_mode));
